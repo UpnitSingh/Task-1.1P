@@ -4,7 +4,7 @@ pipeline {
     environment {
         DIRECTORY_PATH = "https://github.com/UpnitSingh/Task-1.1P.git"
         TESTING_ENVIRONMENT = "Testing_Env"
-        PRODUCTION_ENVIRONMENT = "Upnit_Singh"  // Change this to your name
+        PRODUCTION_ENVIRONMENT = "Upnit_Singh"  
     }
 
     stages {
