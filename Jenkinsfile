@@ -97,7 +97,9 @@ pipeline {
         }
         failure {
             script {
-                writeFile file: "${LOG_FILE}", text: currentBuild.getLog(100).join("\n")
+               def log = currentBuild.rawBuild.getLog(100).join("\n")
+             echo log
+
             }
             archiveArtifacts artifacts: "${LOG_FILE}", fingerprint: true
             emailext subject: "Jenkins Pipeline Failure",
