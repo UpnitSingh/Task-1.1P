@@ -4,8 +4,9 @@ pipeline {
     environment {
         DIRECTORY_PATH = "https://github.com/UpnitSingh/Task-1.1P.git"
         TESTING_ENVIRONMENT = "Testing_Env"
-        PRODUCTION_ENVIRONMENT = "Upnit_Singh"  
+        PRODUCTION_ENVIRONMENT = "Upnit_Singh"
         RECIPIENT_EMAIL = "singhupnit@gmail.com"
+        LOG_FILE = "jenkins-log.txt"
     }
 
     stages {
@@ -19,20 +20,23 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Compiling the code and generating artifacts"
-                
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
                 echo "Running unit and integration tests"
-              
             }
             post {
                 always {
-                    emailext subject: "Jenkins Test Results", 
-                             body: "Unit & Integration tests completed. Check Jenkins logs for details.",
-                             to: "${RECIPIENT_EMAIL}"
+                    script {
+                        writeFile file: "${LOG_FILE}", text: currentBuild.rawBuild.getLog().join("\n")
+                    }
+                    archiveArtifacts artifacts: "${LOG_FILE}", fingerprint: true
+                    emailext subject: "Jenkins Test Results",
+                             body: "Unit & Integration tests completed. Log file attached.",
+                             to: "${RECIPIENT_EMAIL}",
+                             attachmentsPattern: "${LOG_FILE}"
                 }
             }
         }
@@ -40,20 +44,23 @@ pipeline {
         stage('Code Quality Check') {
             steps {
                 echo "Analyzing code quality using SonarQube"
-                
             }
         }
 
         stage('Security Scan') {
             steps {
                 echo "Performing security scan using OWASP Dependency Check"
-                
             }
             post {
                 always {
-                    emailext subject: "Jenkins Security Scan Results", 
-                             body: "Security scan completed. Check Jenkins logs for details.",
-                             to: "${RECIPIENT_EMAIL}"
+                    script {
+                        writeFile file: "${LOG_FILE}", text: currentBuild.rawBuild.getLog().join("\n")
+                    }
+                    archiveArtifacts artifacts: "${LOG_FILE}", fingerprint: true
+                    emailext subject: "Jenkins Security Scan Results",
+                             body: "Security scan completed. Log file attached.",
+                             to: "${RECIPIENT_EMAIL}",
+                             attachmentsPattern: "${LOG_FILE}"
                 }
             }
         }
@@ -61,37 +68,42 @@ pipeline {
         stage('Deploy to Staging') {
             steps {
                 echo "Deploying the application to staging: ${TESTING_ENVIRONMENT}"
-               
             }
         }
 
         stage('Integration Tests on Staging') {
             steps {
                 echo "Running integration tests on staging"
-                
             }
         }
-
-        
 
         stage('Deploy to Production') {
             steps {
                 echo "Deploying application to production: ${PRODUCTION_ENVIRONMENT}"
-                
             }
         }
     }
 
     post {
         success {
-            emailext subject: "Jenkins Pipeline Success", 
-                     body: "Pipeline executed successfully! Application is now deployed.",
-                     to: "${RECIPIENT_EMAIL}"
+            script {
+                writeFile file: "${LOG_FILE}", text: currentBuild.rawBuild.getLog().join("\n")
+            }
+            archiveArtifacts artifacts: "${LOG_FILE}", fingerprint: true
+            emailext subject: "Jenkins Pipeline Success",
+                     body: "Pipeline executed successfully! Log file attached.",
+                     to: "${RECIPIENT_EMAIL}",
+                     attachmentsPattern: "${LOG_FILE}"
         }
         failure {
-            emailext subject: "Jenkins Pipeline Failure", 
-                     body: "Pipeline execution failed. Check Jenkins logs for details.",
-                     to: "${RECIPIENT_EMAIL}"
+            script {
+                writeFile file: "${LOG_FILE}", text: currentBuild.rawBuild.getLog().join("\n")
+            }
+            archiveArtifacts artifacts: "${LOG_FILE}", fingerprint: true
+            emailext subject: "Jenkins Pipeline Failure",
+                     body: "Pipeline execution failed. Log file attached.",
+                     to: "${RECIPIENT_EMAIL}",
+                     attachmentsPattern: "${LOG_FILE}"
         }
     }
 }
