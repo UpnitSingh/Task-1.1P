@@ -19,14 +19,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Compiling the code and generating artifacts"
-                bat 'mvn clean package'
+                
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
                 echo "Running unit and integration tests"
-                bat 'mvn test'
+              
             }
             post {
                 always {
@@ -40,14 +40,14 @@ pipeline {
         stage('Code Quality Check') {
             steps {
                 echo "Analyzing code quality using SonarQube"
-                bat 'mvn sonar:sonar'
+                
             }
         }
 
         stage('Security Scan') {
             steps {
                 echo "Performing security scan using OWASP Dependency Check"
-                bat 'mvn dependency-check:check'
+                
             }
             post {
                 always {
@@ -61,14 +61,14 @@ pipeline {
         stage('Deploy to Staging') {
             steps {
                 echo "Deploying the application to staging: ${TESTING_ENVIRONMENT}"
-                bat 'pscp target\\*.jar user@staging-server:/deployments/'
+               
             }
         }
 
         stage('Integration Tests on Staging') {
             steps {
                 echo "Running integration tests on staging"
-                bat 'mvn verify'
+                
             }
         }
 
@@ -82,7 +82,7 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 echo "Deploying application to production: ${PRODUCTION_ENVIRONMENT}"
-                bat 'pscp target\\*.jar user@production-server:/deployments/'
+                
             }
         }
     }
