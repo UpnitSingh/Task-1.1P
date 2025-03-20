@@ -30,7 +30,7 @@ pipeline {
             post {
                 always {
                     script {
-                        writeFile file: "${LOG_FILE}", text: currentBuild.rawBuild.getLog().join("\n")
+                        writeFile file: "${LOG_FILE}", text: currentBuild.getLog(100).join("\n")
                     }
                     archiveArtifacts artifacts: "${LOG_FILE}", fingerprint: true
                     emailext subject: "Jenkins Test Results",
@@ -54,7 +54,7 @@ pipeline {
             post {
                 always {
                     script {
-                        writeFile file: "${LOG_FILE}", text: currentBuild.rawBuild.getLog().join("\n")
+                        writeFile file: "${LOG_FILE}", text: currentBuild.getLog(100).join("\n")
                     }
                     archiveArtifacts artifacts: "${LOG_FILE}", fingerprint: true
                     emailext subject: "Jenkins Security Scan Results",
@@ -87,23 +87,4 @@ pipeline {
     post {
         success {
             script {
-                writeFile file: "${LOG_FILE}", text: currentBuild.rawBuild.getLog().join("\n")
-            }
-            archiveArtifacts artifacts: "${LOG_FILE}", fingerprint: true
-            emailext subject: "Jenkins Pipeline Success",
-                     body: "Pipeline executed successfully! Log file attached.",
-                     to: "${RECIPIENT_EMAIL}",
-                     attachmentsPattern: "${LOG_FILE}"
-        }
-        failure {
-            script {
-                writeFile file: "${LOG_FILE}", text: currentBuild.rawBuild.getLog().join("\n")
-            }
-            archiveArtifacts artifacts: "${LOG_FILE}", fingerprint: true
-            emailext subject: "Jenkins Pipeline Failure",
-                     body: "Pipeline execution failed. Log file attached.",
-                     to: "${RECIPIENT_EMAIL}",
-                     attachmentsPattern: "${LOG_FILE}"
-        }
-    }
-}
+                writeFile file
