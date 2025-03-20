@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DIRECTORY_PATH = "https://github.com/UpnitSingh/Task-1.1P"
+        DIRECTORY_PATH = "https://github.com/UpnitSingh/Task-1.1P.git"
         TESTING_ENVIRONMENT = "Testing_Env"
         PRODUCTION_ENVIRONMENT = "Upnit_Singh"  
         RECIPIENT_EMAIL = "singhupnit@example.com"
