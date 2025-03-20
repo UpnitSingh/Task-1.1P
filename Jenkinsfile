@@ -12,8 +12,11 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                echo "Fetching source code from: ${DIRECTORY_PATH}"
-                git url: "${DIRECTORY_PATH}", branch: 'main'
+                script {
+                    echo "Fetching source code from: ${env.DIRECTORY_PATH}"
+                    checkout([$class: 'GitSCM', branches: [[name: '*/main']], 
+                              userRemoteConfigs: [[url: env.DIRECTORY_PATH]]])
+                }
             }
         }
 
@@ -30,13 +33,15 @@ pipeline {
             post {
                 always {
                     script {
-                        writeFile file: "${LOG_FILE}", text: currentBuild.getLog(100).join("\n")
+                        def logs = currentBuild.rawBuild.getLog(100).join("\n")
+                        writeFile file: "${LOG_FILE}", text: logs
                     }
                     archiveArtifacts artifacts: "${LOG_FILE}", fingerprint: true
                     emailext subject: "Jenkins Test Results",
                              body: "Unit & Integration tests completed. Log file attached.",
-                             to: "${RECIPIENT_EMAIL}",
-                             attachmentsPattern: "${LOG_FILE}"
+                             to: "${env.RECIPIENT_EMAIL}",
+                             attachmentsPattern: "${LOG_FILE}",
+                             mimeType: 'text/plain'
                 }
             }
         }
@@ -54,20 +59,22 @@ pipeline {
             post {
                 always {
                     script {
-                        writeFile file: "${LOG_FILE}", text: currentBuild.getLog(100).join("\n")
+                        def logs = currentBuild.rawBuild.getLog(100).join("\n")
+                        writeFile file: "${LOG_FILE}", text: logs
                     }
                     archiveArtifacts artifacts: "${LOG_FILE}", fingerprint: true
                     emailext subject: "Jenkins Security Scan Results",
                              body: "Security scan completed. Log file attached.",
-                             to: "${RECIPIENT_EMAIL}",
-                             attachmentsPattern: "${LOG_FILE}"
+                             to: "${env.RECIPIENT_EMAIL}",
+                             attachmentsPattern: "${LOG_FILE}",
+                             mimeType: 'text/plain'
                 }
             }
         }
 
         stage('Deploy to Staging') {
             steps {
-                echo "Deploying the application to staging: ${TESTING_ENVIRONMENT}"
+                echo "Deploying the application to staging: ${env.TESTING_ENVIRONMENT}"
             }
         }
 
@@ -79,7 +86,7 @@ pipeline {
 
         stage('Deploy to Production') {
             steps {
-                echo "Deploying application to production: ${PRODUCTION_ENVIRONMENT}"
+                echo "Deploying application to production: ${env.PRODUCTION_ENVIRONMENT}"
             }
         }
     }
@@ -87,25 +94,28 @@ pipeline {
     post {
         success {
             script {
-                writeFile file: "${LOG_FILE}", text: currentBuild.getLog(100).join("\n")
+                def logs = currentBuild.rawBuild.getLog(100).join("\n")
+                writeFile file: "${LOG_FILE}", text: logs
             }
             archiveArtifacts artifacts: "${LOG_FILE}", fingerprint: true
             emailext subject: "Jenkins Pipeline Success",
                      body: "Pipeline executed successfully! Log file attached.",
-                     to: "${RECIPIENT_EMAIL}",
-                     attachmentsPattern: "${LOG_FILE}"
+                     to: "${env.RECIPIENT_EMAIL}",
+                     attachmentsPattern: "${LOG_FILE}",
+                     mimeType: 'text/plain'
         }
         failure {
             script {
-               def log = currentBuild.rawBuild.getLog(100).join("\n")
-             echo log
-
+                def logs = currentBuild.rawBuild.getLog(100).join("\n")
+                writeFile file: "${LOG_FILE}", text: logs
+                echo logs
             }
             archiveArtifacts artifacts: "${LOG_FILE}", fingerprint: true
             emailext subject: "Jenkins Pipeline Failure",
                      body: "Pipeline execution failed. Log file attached.",
-                     to: "${RECIPIENT_EMAIL}",
-                     attachmentsPattern: "${LOG_FILE}"
+                     to: "${env.RECIPIENT_EMAIL}",
+                     attachmentsPattern: "${LOG_FILE}",
+                     mimeType: 'text/plain'
         }
     }
 }
